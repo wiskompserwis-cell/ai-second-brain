@@ -6,7 +6,7 @@
 > cross-agent shared log — running daily on real client work.
 
 <p align="center">
-  <a href="assets/architecture.svg" title="Open full size (zoom / pan in your browser)"><img src="assets/architecture.svg" width="100%"
+  <a href="https://wiskompserwis-cell.github.io/ai-second-brain/" title="Open the interactive diagram — zoom, pan, fullscreen"><img src="assets/architecture.svg" width="100%"
        alt="AI Second Brain memory architecture schematic — a learning brain (Obsidian vault: inbox → knowledge/sources, connection pass) read on demand, and an operational brain (MEMORY.md index + _inbox → typed memory files: user/feedback/project/reference) read every session via hooks + skills. Two memory systems, different refresh rates."></a>
 </p>
 <p align="center">
