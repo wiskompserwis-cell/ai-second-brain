@@ -9,7 +9,10 @@
   <a href="assets/architecture.svg" title="Open full size (zoom / pan in your browser)"><img src="assets/architecture.svg" width="100%"
        alt="AI Second Brain memory architecture schematic — a learning brain (Obsidian vault: inbox → knowledge/sources, connection pass) read on demand, and an operational brain (MEMORY.md index + _inbox → typed memory files: user/feedback/project/reference) read every session via hooks + skills. Two memory systems, different refresh rates."></a>
 </p>
-<p align="center"><sub>🔍 <b>Click the diagram to open it full size</b> (zoom &amp; pan in your browser).</sub></p>
+<p align="center">
+  <b><a href="https://wiskompserwis-cell.github.io/ai-second-brain/">🔍 Open the interactive version →</a></b>
+  &nbsp;·&nbsp; <sub>zoom · pan · fullscreen</sub>
+</p>
 
 Most "second brain with Claude Code" writeups build one thing: a knowledge vault — books,
 articles, mental models, distilled into linked Markdown. That's useful. But after running an

@@ -1,0 +1,325 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI Second Brain — Interactive Memory Architecture</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: #5b5f63; overflow: hidden;
+    font-family: ui-monospace, 'IBM Plex Mono', 'Courier New', monospace; }
+  #stage { position: fixed; inset: 0; cursor: grab; touch-action: none; }
+  #stage.grabbing { cursor: grabbing; }
+  #viewport { position: absolute; top: 0; left: 0; transform-origin: 0 0; will-change: transform; }
+  #viewport svg { display: block; box-shadow: 0 10px 40px rgba(0,0,0,.4); border: 1px solid #cfcabb; background: #fff; }
+  #toolbar { position: fixed; top: 12px; left: 12px; display: flex; gap: 6px; z-index: 10;
+    background: #1d2124; border: 1px solid #3a3f43; border-radius: 8px; padding: 6px;
+    box-shadow: 0 4px 16px rgba(0,0,0,.4); }
+  #toolbar button { background: #2a2f33; color: #e6e6e6; border: 1px solid #3a3f43;
+    border-radius: 5px; width: 36px; height: 36px; font-size: 16px; cursor: pointer;
+    font-family: inherit; line-height: 1; }
+  #toolbar button:hover { background: #363c40; }
+  #title { position: fixed; top: 16px; right: 16px; color: #e9ebec; font-size: 12px;
+    letter-spacing: .3px; text-align: right; }
+  #title b { font-weight: 700; }
+  #hint { position: fixed; bottom: 12px; left: 12px; color: #dfe2e3; font-size: 12px;
+    background: rgba(29,33,36,.75); padding: 7px 11px; border-radius: 6px; }
+  a.home { color: #9ec3de; text-decoration: none; }
+  a.home:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<div id="toolbar">
+  <button id="zin"   title="Zoom in">+</button>
+  <button id="zout"  title="Zoom out">&#8722;</button>
+  <button id="reset" title="Reset / fit to screen">&#8635;</button>
+  <button id="full"  title="Fullscreen">&#9974;</button>
+</div>
+<div id="title"><b>AI SECOND BRAIN</b> — Memory Architecture<br>
+  <a class="home" href="https://github.com/wiskompserwis-cell/ai-second-brain">read the writeup &#8599;</a></div>
+<div id="hint">Scroll to zoom &middot; drag to pan &middot; &#8635; reset &middot; &#9974; fullscreen</div>
+
+<div id="stage"><div id="viewport">
+<svg viewBox="0 0 1600 1080" width="1600" height="1080" font-family="'IBM Plex Mono', ui-monospace, 'Courier New', monospace" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<pattern id="gridPattern" width="24" height="24" patternUnits="userSpaceOnUse">
+  <path d="M24 0H0V24" fill="none" stroke="#e7e4da" stroke-width="1"></path>
+</pattern>
+<marker id="arrowBlue" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 Z" fill="#16456b"></path></marker>
+<marker id="arrowLightBlue" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 Z" fill="#7ea6c4"></path></marker>
+<marker id="arrowRust" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 Z" fill="#a3501f"></path></marker>
+<marker id="arrowInk" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 Z" fill="#2a2a2a"></path></marker>
+<symbol id="ico-agent" viewBox="0 0 120 120">
+  <circle cx="46" cy="38" r="20" fill="#fff" stroke="#111" stroke-width="3"></circle>
+  <path d="M14 100 Q14 62 46 62 Q78 62 78 100" fill="#fff" stroke="#111" stroke-width="3"></path>
+  <circle cx="88" cy="30" r="16" fill="#fff" stroke="#111" stroke-width="2.6"></circle>
+  <path d="M88 20 v6 M88 34 v6 M78 30 h6 M92 30 h6" stroke="#111" stroke-width="2.2" stroke-linecap="round"></path>
+  <circle cx="88" cy="30" r="4" fill="#111"></circle>
+</symbol>
+<symbol id="ico-inbox" viewBox="0 0 120 120">
+  <polygon points="20,58 100,58 100,96 20,96" fill="#fff" stroke="#111" stroke-width="2.8"></polygon>
+  <polyline points="20,58 40,58 48,70 72,70 80,58 100,58" fill="none" stroke="#111" stroke-width="2.4"></polyline>
+  <line x1="60" y1="20" x2="60" y2="54" stroke="#111" stroke-width="3" stroke-linecap="round"></line>
+  <polygon points="60,58 48,42 72,42" fill="#111"></polygon>
+</symbol>
+<symbol id="ico-graph" viewBox="0 0 120 120">
+  <rect x="14" y="14" width="92" height="92" rx="6" fill="#fff" stroke="#111" stroke-width="2.4"></rect>
+  <g stroke="#111" stroke-width="1.8">
+    <line x1="35" y1="35" x2="60" y2="60"></line><line x1="60" y1="60" x2="88" y2="40"></line>
+    <line x1="60" y1="60" x2="40" y2="88"></line><line x1="60" y1="60" x2="85" y2="85"></line>
+    <line x1="35" y1="35" x2="40" y2="88"></line>
+  </g>
+  <g fill="#fff" stroke="#111" stroke-width="2.4">
+    <circle cx="35" cy="35" r="7"></circle><circle cx="88" cy="40" r="7"></circle><circle cx="60" cy="60" r="8"></circle>
+    <circle cx="40" cy="88" r="7"></circle><circle cx="85" cy="85" r="7"></circle>
+  </g>
+</symbol>
+<symbol id="ico-hooks" viewBox="0 0 120 120">
+  <circle cx="60" cy="60" r="24" fill="#fff" stroke="#111" stroke-width="2.6"></circle>
+  <circle cx="60" cy="60" r="9" fill="none" stroke="#111" stroke-width="2.4"></circle>
+  <g stroke="#111" stroke-width="6" stroke-linecap="round">
+    <line x1="60" y1="18" x2="60" y2="30"></line><line x1="60" y1="90" x2="60" y2="102"></line>
+    <line x1="18" y1="60" x2="30" y2="60"></line><line x1="90" y1="60" x2="102" y2="60"></line>
+    <line x1="30" y1="30" x2="38" y2="38"></line><line x1="82" y1="82" x2="90" y2="90"></line>
+    <line x1="90" y1="30" x2="82" y2="38"></line><line x1="38" y1="82" x2="30" y2="90"></line>
+  </g>
+</symbol>
+<symbol id="ico-index" viewBox="0 0 120 120">
+  <rect x="26" y="14" width="68" height="92" rx="4" fill="#fff" stroke="#111" stroke-width="2.6"></rect>
+  <rect x="14" y="30" width="16" height="20" fill="#fff" stroke="#111" stroke-width="2.2"></rect>
+  <g stroke="#111" stroke-width="2">
+    <line x1="40" y1="34" x2="82" y2="34"></line><line x1="40" y1="50" x2="82" y2="50"></line>
+    <line x1="40" y1="66" x2="82" y2="66"></line><line x1="40" y1="82" x2="70" y2="82"></line>
+  </g>
+</symbol>
+<symbol id="ico-memoryfile" viewBox="0 0 120 120">
+  <rect x="30" y="26" width="62" height="76" rx="4" fill="#fff" stroke="#111" stroke-width="2.2"></rect>
+  <rect x="18" y="14" width="62" height="76" rx="4" fill="#fff" stroke="#111" stroke-width="2.6"></rect>
+  <g stroke="#111" stroke-width="1.8">
+    <line x1="28" y1="30" x2="68" y2="30"></line><line x1="28" y1="44" x2="68" y2="44"></line>
+    <line x1="28" y1="58" x2="58" y2="58"></line>
+  </g>
+  <circle cx="60" cy="82" r="7" fill="none" stroke="#111" stroke-width="2.2"></circle>
+  <circle cx="76" cy="92" r="7" fill="none" stroke="#111" stroke-width="2.2"></circle>
+  <line x1="66" y1="86" x2="70" y2="88" stroke="#111" stroke-width="2.2"></line>
+</symbol>
+</defs>
+
+<rect x="0" y="0" width="1600" height="1080" fill="#ffffff"></rect>
+
+<rect x="150" y="110" width="1080" height="740" fill="#fff" stroke="#1d1d1d" stroke-width="7"></rect>
+<rect x="150" y="110" width="1080" height="740" fill="url(#gridPattern)"></rect>
+
+<g opacity="1">
+<rect x="460" y="140" width="440" height="300" fill="#fff" fill-opacity="0.4" stroke="#16456b" stroke-width="2"></rect>
+<text x="472" y="162" font-size="15" fill="#16456b" font-weight="700" letter-spacing="0.5">LEARNING BRAIN</text>
+<text x="472" y="178" font-size="11" fill="#8a8a8a" letter-spacing="0.3">stable for years</text>
+<rect x="640" y="192" width="120" height="66" rx="4" fill="#fff" stroke="#16456b" stroke-width="2"></rect>
+<use href="#ico-inbox" x="676" y="198" width="48" height="38"></use>
+<text x="700" y="250" font-size="12" fill="#16456b" font-weight="700" letter-spacing="0.5" text-anchor="middle">INBOX</text>
+<line x1="700" y1="258" x2="700" y2="306" stroke="#16456b" stroke-width="2" marker-end="url(#arrowBlue)"></line>
+<rect x="712" y="274" width="110" height="14" fill="#fff"></rect>
+<text x="714" y="284" font-size="10" fill="#7a7a7a" letter-spacing="0.2">weekly process</text>
+<rect x="560" y="310" width="280" height="110" rx="4" fill="#fff" stroke="#16456b" stroke-width="2"></rect>
+<use href="#ico-graph" x="674" y="320" width="52" height="52"></use>
+<text x="700" y="390" font-size="13" fill="#16456b" font-weight="700" letter-spacing="0.3" text-anchor="middle">KNOWLEDGE / SOURCES</text>
+<text x="700" y="406" font-size="11" fill="#8a8a8a" letter-spacing="0.2" text-anchor="middle">Obsidian vault &middot; graph</text>
+<path d="M840,340 C900,340 900,220 764,220" fill="none" stroke="#7ea6c4" stroke-width="1.8" marker-end="url(#arrowLightBlue)"></path>
+<rect x="805" y="269" width="112" height="17" fill="#fff"></rect>
+<text x="861" y="281" font-size="10" fill="#7a7a7a" letter-spacing="0.2" text-anchor="middle">connection pass</text>
+<polyline points="365,465 410,465 410,220 640,220" fill="none" stroke="#16456b" stroke-width="2.6" marker-end="url(#arrowBlue)"></polyline>
+<rect x="382" y="328" width="150" height="40" rx="4" fill="#f3f1ea" stroke="#9a958a" stroke-width="1.6"></rect>
+<text x="457" y="344" font-size="10" fill="#555" letter-spacing="0.2" text-anchor="middle">on demand,</text>
+<text x="457" y="358" font-size="10" fill="#555" letter-spacing="0.2" text-anchor="middle">when learning / writing</text>
+</g>
+
+<ellipse cx="260" cy="490" rx="105" ry="50" fill="#fff" stroke="#2a2a2a" stroke-width="3"></ellipse>
+<use href="#ico-agent" x="234" y="440" width="52" height="52"></use>
+<text x="260" y="522" font-size="14" fill="#2a2a2a" font-weight="700" letter-spacing="0.5" text-anchor="middle">YOU + AGENT</text>
+
+<g opacity="1">
+<rect x="460" y="470" width="340" height="90" rx="45" fill="#fff" stroke="#2a2a2a" stroke-width="2.5"></rect>
+<use href="#ico-hooks" x="482" y="494" width="40" height="40"></use>
+<text x="575" y="502" font-size="14" font-weight="700" fill="#2a2a2a" letter-spacing="0.5">HOOKS + SKILLS</text>
+<text x="575" y="520" font-size="10" fill="#8a8a8a" letter-spacing="0">catch-up &middot; quality gate &middot; workflows</text>
+<line x1="800" y1="515" x2="920" y2="515" stroke="#a3501f" stroke-width="2.6" marker-end="url(#arrowRust)"></line>
+<rect x="800" y="491" width="120" height="34" rx="4" fill="#f3f1ea" stroke="#9a958a" stroke-width="1.6"></rect>
+<text x="860" y="505" font-size="10" fill="#555" letter-spacing="0.2" text-anchor="middle">every session,</text>
+<text x="860" y="518" font-size="10" fill="#555" letter-spacing="0.2" text-anchor="middle">automatic</text>
+<rect x="920" y="470" width="300" height="345" fill="#fff" fill-opacity="0.4" stroke="#a3501f" stroke-width="2"></rect>
+<text x="932" y="492" font-size="15" font-weight="700" fill="#a3501f" letter-spacing="0.5">OPERATIONAL BRAIN</text>
+<text x="932" y="508" font-size="11" fill="#8a8a8a" letter-spacing="0.3">changes weekly</text>
+<rect x="945" y="525" width="120" height="90" rx="4" fill="#fff" stroke="#a3501f" stroke-width="2"></rect>
+<use href="#ico-index" x="985" y="535" width="40" height="42"></use>
+<text x="1005" y="594" font-size="10.5" font-weight="700" fill="#a3501f" letter-spacing="0.1" text-anchor="middle">MEMORY.md</text>
+<text x="1005" y="608" font-size="9" fill="#8a8a8a" letter-spacing="0.1" text-anchor="middle">session index</text>
+<rect x="1075" y="525" width="120" height="90" rx="4" fill="#fff" stroke="#a3501f" stroke-width="2"></rect>
+<use href="#ico-inbox" x="1116" y="535" width="38" height="32"></use>
+<text x="1135" y="594" font-size="10.5" font-weight="700" fill="#a3501f" letter-spacing="0.1" text-anchor="middle">_inbox</text>
+<text x="1135" y="608" font-size="9" fill="#8a8a8a" letter-spacing="0.1" text-anchor="middle">quick capture</text>
+<polyline points="1005,615 1005,630 1070,630" fill="none" stroke="#a3501f" stroke-width="2"></polyline>
+<polyline points="1135,615 1135,630 1070,630" fill="none" stroke="#a3501f" stroke-width="2"></polyline>
+<line x1="1070" y1="630" x2="1070" y2="654" stroke="#a3501f" stroke-width="2" marker-end="url(#arrowRust)"></line>
+<rect x="1015" y="622" width="110" height="16" fill="#fff"></rect>
+<text x="1070" y="634" font-size="10" fill="#7a7a7a" letter-spacing="0.2" text-anchor="middle">drain on cleanup</text>
+<rect x="945" y="654" width="250" height="160" rx="4" fill="#fff" stroke="#a3501f" stroke-width="2.5"></rect>
+<use href="#ico-memoryfile" x="1053" y="662" width="34" height="34"></use>
+<text x="1070" y="712" font-size="12" font-weight="700" fill="#a3501f" letter-spacing="0.2" text-anchor="middle">TYPED MEMORY FILES</text>
+<rect x="955" y="720" width="230" height="40" rx="4" fill="#a3501f" stroke="#7a3814" stroke-width="1.5"></rect>
+<text x="1070" y="736" font-size="11" font-weight="700" fill="#fff" letter-spacing="0.8" text-anchor="middle">FEEDBACK</text>
+<text x="1070" y="752" font-size="8.5" fill="#fce9dc" letter-spacing="0.1" text-anchor="middle">corrections + the WHY — stops repeated mistakes</text>
+<rect x="955" y="768" width="70" height="20" rx="10" fill="#fff" stroke="#9a958a" stroke-width="1.2"></rect>
+<text x="990" y="782" font-size="9" fill="#555" text-anchor="middle">user</text>
+<rect x="1033" y="768" width="70" height="20" rx="10" fill="#fff" stroke="#9a958a" stroke-width="1.2"></rect>
+<text x="1068" y="782" font-size="9" fill="#555" text-anchor="middle">project</text>
+<rect x="1111" y="768" width="70" height="20" rx="10" fill="#fff" stroke="#9a958a" stroke-width="1.2"></rect>
+<text x="1146" y="782" font-size="9" fill="#555" text-anchor="middle">reference</text>
+<text x="1070" y="806" font-size="9.5" fill="#8a8a8a" letter-spacing="0.1" text-anchor="middle">one fact per file &middot; linked</text>
+</g>
+
+<polyline points="365,505 410,505 410,515 460,515" fill="none" stroke="#2a2a2a" stroke-width="2.6" marker-end="url(#arrowInk)"></polyline>
+
+<rect x="170" y="590" width="270" height="130" fill="#fff" stroke="#1d1d1d" stroke-width="1.6"></rect>
+<rect x="170" y="590" width="270" height="28" fill="#16456b"></rect>
+<text x="184" y="609" font-size="11" fill="#fff" font-weight="700" letter-spacing="0.5">BRAIN — REFRESH / READ</text>
+<line x1="300" y1="618" x2="300" y2="720" stroke="#ccc9bd" stroke-width="1"></line>
+<line x1="170" y1="670" x2="440" y2="670" stroke="#ccc9bd" stroke-width="1"></line>
+<rect x="180" y="634" width="14" height="14" fill="#a3501f"></rect>
+<text x="202" y="646" font-size="10.5" fill="#222" font-weight="600">Operational</text>
+<text x="310" y="640" font-size="9" fill="#666">weekly &middot; read every</text>
+<text x="310" y="652" font-size="9" fill="#666">session (automatic)</text>
+<rect x="180" y="686" width="14" height="14" fill="#16456b"></rect>
+<text x="202" y="698" font-size="10.5" fill="#222" font-weight="600">Learning</text>
+<text x="310" y="692" font-size="9" fill="#666">stable for years &middot; read</text>
+<text x="310" y="704" font-size="9" fill="#666">on demand</text>
+
+<g>
+<rect x="170" y="735" width="270" height="95" fill="#fff" stroke="#1d1d1d" stroke-width="1.4"></rect>
+<text x="182" y="753" font-size="11" fill="#222" font-weight="700" letter-spacing="0.3">NOTES / ERRATA</text>
+<text x="182" y="771" font-size="9" fill="#666">1. Very long contexts alone lose</text>
+<text x="182" y="783" font-size="9" fill="#666">   accuracy on facts buried deep in them.</text>
+<text x="182" y="799" font-size="9" fill="#666">2. Retrieval-first keeps lookups cheap</text>
+<text x="182" y="811" font-size="9" fill="#666">   &amp; precise as the vault grows.</text>
+</g>
+
+<g>
+<line x1="150" y1="40" x2="1230" y2="40" stroke="#6b6b6b" stroke-width="1"></line>
+<line x1="150" y1="34" x2="150" y2="46" stroke="#6b6b6b" stroke-width="1"></line>
+<line x1="1230" y1="34" x2="1230" y2="46" stroke="#6b6b6b" stroke-width="1"></line>
+<rect x="415" y="31" width="550" height="18" fill="#fff"></rect>
+<text x="690" y="44" font-size="11" fill="#6b6b6b" letter-spacing="0.2" text-anchor="middle">TWO MEMORY SYSTEMS — DIFFERENT REFRESH RATES, DIFFERENT JOBS</text>
+<line x1="150" y1="900" x2="1230" y2="900" stroke="#6b6b6b" stroke-width="1"></line>
+<line x1="150" y1="894" x2="150" y2="906" stroke="#6b6b6b" stroke-width="1"></line>
+<line x1="1230" y1="894" x2="1230" y2="906" stroke="#6b6b6b" stroke-width="1"></line>
+<rect x="410" y="891" width="560" height="18" fill="#fff"></rect>
+<text x="690" y="904" font-size="10.5" fill="#6b6b6b" letter-spacing="0.2" text-anchor="middle">RETRIEVAL-FIRST DESIGN KEEPS LOOKUPS CHEAP &amp; PRECISE AS THE VAULT GROWS</text>
+<line x1="100" y1="110" x2="100" y2="850" stroke="#6b6b6b" stroke-width="1"></line>
+<line x1="94" y1="110" x2="106" y2="110" stroke="#6b6b6b" stroke-width="1"></line>
+<line x1="94" y1="850" x2="106" y2="850" stroke="#6b6b6b" stroke-width="1"></line>
+<rect x="88" y="327" width="24" height="306" fill="#fff"></rect>
+<text x="100" y="480" font-size="10.5" fill="#6b6b6b" letter-spacing="0.2" text-anchor="middle" transform="rotate(-90 100 480)">OPERATIONAL = REBUILDABLE &middot; LEARNING = DURABLE</text>
+</g>
+
+<rect x="1300" y="110" width="250" height="740" fill="#fff" stroke="#1d1d1d" stroke-width="1.6"></rect>
+<rect x="1300" y="110" width="250" height="34" fill="#16456b"></rect>
+<text x="1314" y="132" font-size="13" fill="#fff" font-weight="700" letter-spacing="0.5">LEGEND — SYSTEM SYMBOLS</text>
+<use href="#ico-agent" x="1316" y="160" width="40" height="40"></use>
+<text x="1372" y="185" font-size="11" fill="#333" letter-spacing="0.1">You + Agent (human loop)</text>
+<use href="#ico-inbox" x="1316" y="224" width="40" height="40"></use>
+<text x="1372" y="249" font-size="11" fill="#333" letter-spacing="0.1">Inbox — capture</text>
+<use href="#ico-graph" x="1316" y="288" width="40" height="40"></use>
+<text x="1372" y="313" font-size="11" fill="#333" letter-spacing="0.1">Knowledge graph — vault</text>
+<use href="#ico-hooks" x="1316" y="352" width="40" height="40"></use>
+<text x="1372" y="377" font-size="11" fill="#333" letter-spacing="0.1">Hooks &amp; skills</text>
+<use href="#ico-index" x="1316" y="416" width="40" height="40"></use>
+<text x="1372" y="441" font-size="11" fill="#333" letter-spacing="0.1">MEMORY.md index</text>
+<use href="#ico-memoryfile" x="1316" y="480" width="40" height="40"></use>
+<text x="1372" y="505" font-size="11" fill="#333" letter-spacing="0.1">Typed memory files</text>
+<rect x="1316" y="544" width="40" height="40" rx="4" fill="#a3501f" stroke="#7a3814" stroke-width="1.5"></rect>
+<text x="1372" y="569" font-size="11" fill="#333" letter-spacing="0.1">Feedback (highlighted)</text>
+<line x1="1316" y1="608" x2="1358" y2="608" stroke="#16456b" stroke-width="3"></line>
+<text x="1372" y="613" font-size="11" fill="#333" letter-spacing="0.1">Learning &middot; on-demand</text>
+<line x1="1316" y1="632" x2="1358" y2="632" stroke="#a3501f" stroke-width="3"></line>
+<text x="1372" y="637" font-size="11" fill="#333" letter-spacing="0.1">Operational &middot; automatic</text>
+<text x="1314" y="668" font-size="9" fill="#999" letter-spacing="0.1">Network-schematic notation.</text>
+
+<rect x="110" y="934" width="1440" height="138" fill="#fff" stroke="#1d1d1d" stroke-width="1.8"></rect>
+<line x1="870" y1="934" x2="870" y2="1072" stroke="#1d1d1d" stroke-width="1"></line>
+<line x1="870" y1="1003" x2="1550" y2="1003" stroke="#999" stroke-width="0.8"></line>
+<line x1="1120" y1="989" x2="1120" y2="1072" stroke="#999" stroke-width="0.8"></line>
+<line x1="1350" y1="989" x2="1350" y2="1072" stroke="#999" stroke-width="0.8"></line>
+<text x="138" y="980" font-size="24" fill="#111" font-weight="700" letter-spacing="0.3">AI SECOND BRAIN — Memory Architecture</text>
+<text x="138" y="1010" font-size="13" fill="#555" letter-spacing="0.2">Dual-memory system: two brains, two refresh rates</text>
+<text x="138" y="1032" font-size="12" fill="#888" letter-spacing="0.2">Operational (weekly, automatic) + Learning (stable, on demand)</text>
+<text x="890" y="958" font-size="9.5" fill="#999" letter-spacing="1">PROJECT</text><text x="890" y="978" font-size="14" fill="#222" font-weight="600" letter-spacing="0.2">SECOND-BRAIN v1</text>
+<text x="1140" y="958" font-size="9.5" fill="#999" letter-spacing="1">SCALE</text><text x="1140" y="978" font-size="14" fill="#222" font-weight="600" letter-spacing="0.2">CONCEPTUAL</text>
+<text x="1370" y="958" font-size="9.5" fill="#999" letter-spacing="1">DATE</text><text x="1370" y="978" font-size="14" fill="#222" font-weight="600" letter-spacing="0.2">2026-07-25</text>
+<text x="890" y="1020" font-size="9.5" fill="#999" letter-spacing="1">DRAWN</text><text x="890" y="1040" font-size="14" fill="#222" font-weight="600" letter-spacing="0.2">AGENT + HUMAN</text>
+<text x="1140" y="1020" font-size="9.5" fill="#999" letter-spacing="1">REV</text><text x="1140" y="1040" font-size="14" fill="#222" font-weight="600" letter-spacing="0.2">A</text>
+<text x="1370" y="1020" font-size="9.5" fill="#999" letter-spacing="1">SHEET</text><text x="1370" y="1040" font-size="14" fill="#222" font-weight="600" letter-spacing="0.2">M-01</text>
+<text x="890" y="1060" font-size="10" fill="#666" letter-spacing="0.3">PN: SB-2BRAIN-001</text>
+</svg>
+</div></div>
+
+<script>
+(function () {
+  var stage = document.getElementById('stage');
+  var vp = document.getElementById('viewport');
+  var CW = 1600, CH = 1080;
+  var scale = 1, tx = 0, ty = 0, minScale = 0.1, maxScale = 12;
+
+  function apply() { vp.style.transform = 'translate(' + tx + 'px,' + ty + 'px) scale(' + scale + ')'; }
+  function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
+
+  function fit() {
+    var pad = 48;
+    var s = Math.min((window.innerWidth - 2 * pad) / CW, (window.innerHeight - 2 * pad) / CH);
+    scale = s;
+    tx = (window.innerWidth - CW * s) / 2;
+    ty = (window.innerHeight - CH * s) / 2;
+    apply();
+  }
+
+  function zoomAt(cx, cy, factor) {
+    var ns = clamp(scale * factor, minScale, maxScale);
+    if (ns === scale) return;
+    tx = cx - (cx - tx) * (ns / scale);
+    ty = cy - (cy - ty) * (ns / scale);
+    scale = ns;
+    apply();
+  }
+
+  stage.addEventListener('wheel', function (e) {
+    e.preventDefault();
+    var r = stage.getBoundingClientRect();
+    zoomAt(e.clientX - r.left, e.clientY - r.top, e.deltaY < 0 ? 1.12 : 1 / 1.12);
+  }, { passive: false });
+
+  var dragging = false, lastX = 0, lastY = 0;
+  stage.addEventListener('pointerdown', function (e) {
+    dragging = true; lastX = e.clientX; lastY = e.clientY;
+    stage.classList.add('grabbing'); stage.setPointerCapture(e.pointerId);
+  });
+  stage.addEventListener('pointermove', function (e) {
+    if (!dragging) return;
+    tx += e.clientX - lastX; ty += e.clientY - lastY;
+    lastX = e.clientX; lastY = e.clientY; apply();
+  });
+  function endDrag() { dragging = false; stage.classList.remove('grabbing'); }
+  stage.addEventListener('pointerup', endDrag);
+  stage.addEventListener('pointercancel', endDrag);
+
+  document.getElementById('zin').onclick = function () { var r = stage.getBoundingClientRect(); zoomAt(r.width / 2, r.height / 2, 1.25); };
+  document.getElementById('zout').onclick = function () { var r = stage.getBoundingClientRect(); zoomAt(r.width / 2, r.height / 2, 1 / 1.25); };
+  document.getElementById('reset').onclick = fit;
+  document.getElementById('full').onclick = function () {
+    if (document.fullscreenElement) document.exitFullscreen();
+    else document.documentElement.requestFullscreen();
+  };
+
+  window.addEventListener('resize', fit);
+  fit();
+})();
+</script>
+</body>
+</html>
