@@ -5,31 +5,10 @@
 > and each stays sharp. Below is the whole method — typed memory, an inbox, hooks, skills, and a
 > cross-agent shared log — running daily on real client work.
 
-```mermaid
-flowchart LR
-    You(["🧑‍💻 You + Agent"])
-
-    subgraph OP["🛠️ OPERATIONAL BRAIN · changes weekly"]
-        direction TB
-        IDX["MEMORY.md — index"]
-        MEM["typed memory files<br/>user · feedback · project · reference<br/>one fact per file · linked"]
-        INB["_inbox — quick capture"]
-        IDX --> MEM
-        INB -. drain on cleanup .-> MEM
-    end
-
-    subgraph LB["📚 LEARNING BRAIN · stable for years"]
-        direction TB
-        LI["inbox"] -. weekly process .-> KN["knowledge / sources<br/>Obsidian vault · graph"]
-        KN -. connection pass .-> KN
-    end
-
-    HOOKS{{"hooks + skills<br/>session catch-up · quality gate · workflows"}}
-
-    You --> HOOKS
-    HOOKS ==>|every session, automatic| IDX
-    You -->|on demand, when learning/writing| KN
-```
+<p align="center">
+  <img src="assets/architecture.svg" width="100%"
+       alt="AI Second Brain memory architecture schematic — a learning brain (Obsidian vault: inbox → knowledge/sources, connection pass) read on demand, and an operational brain (MEMORY.md index + _inbox → typed memory files: user/feedback/project/reference) read every session via hooks + skills. Two memory systems, different refresh rates.">
+</p>
 
 Most "second brain with Claude Code" writeups build one thing: a knowledge vault — books,
 articles, mental models, distilled into linked Markdown. That's useful. But after running an
