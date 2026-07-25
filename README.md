@@ -1,5 +1,36 @@
 # Two Brains, Not One: An Operational Second Brain with Claude Code
 
+> **TL;DR** — Most "second brain" writeups build a knowledge vault. That's only *half*. The other
+> half is an **operational brain**: what's *in flight*, not what you *know*. Keep the two separate
+> and each stays sharp. Below is the whole method — typed memory, an inbox, hooks, skills, and a
+> cross-agent shared log — running daily on real client work.
+
+```mermaid
+flowchart LR
+    You(["🧑‍💻 You + Agent"])
+
+    subgraph OP["🛠️ OPERATIONAL BRAIN · changes weekly"]
+        direction TB
+        IDX["MEMORY.md — index"]
+        MEM["typed memory files<br/>user · feedback · project · reference<br/>one fact per file · linked"]
+        INB["_inbox — quick capture"]
+        IDX --> MEM
+        INB -. drain on cleanup .-> MEM
+    end
+
+    subgraph LB["📚 LEARNING BRAIN · stable for years"]
+        direction TB
+        LI["inbox"] -. weekly process .-> KN["knowledge / sources<br/>Obsidian vault · graph"]
+        KN -. connection pass .-> KN
+    end
+
+    HOOKS{{"hooks + skills<br/>session catch-up · quality gate · workflows"}}
+
+    You --> HOOKS
+    HOOKS ==>|every session, automatic| IDX
+    You -->|on demand, when learning/writing| KN
+```
+
 Most "second brain with Claude Code" writeups build one thing: a knowledge vault — books,
 articles, mental models, distilled into linked Markdown. That's useful. But after running an
 AI-assisted setup daily for real client-delivery work (M&A IT integration — migrating tenants,
